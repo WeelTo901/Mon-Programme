@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Programme">
+<title>Mon Programme</title>
+<style>
+:root{--bg:#0e0e0e;--surface:#181818;--surface2:#222;--border:#2a2a2a;--text:#f0ece4;--muted:#666;--accent1:#e8622a;--accent2:#2a7ae8;--accent3:#2ae87a;--green:#2a6e2a;--gold:#c8a040;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Georgia',serif;min-height:100vh;padding-bottom:80px;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.nav-btn{flex:1;padding:12px 4px 10px;background:none;border:none;color:var(--muted);font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:Georgia,serif;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.nav-btn.active{color:var(--text);}
+.nav-btn .icon{font-size:18px;}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:var(--accent3);display:block;}
+.header{padding:52px 20px 18px;background:#111;border-bottom:1px solid var(--border);}
+.header-label{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.header-title{font-size:22px;font-weight:700;color:var(--text);}
+.header-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.section{display:none;}.section.active{display:block;}
+.content{padding:18px 16px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;}
+.card-body{padding:14px 16px;}
+.day-tabs{display:flex;background:#111;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.day-tabs::-webkit-scrollbar{display:none;}
+.day-tab{flex-shrink:0;padding:13px 12px;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:Georgia,serif;transition:all 0.2s;}
+.day-tab.active{color:var(--text);background:var(--surface);}
+.day-tab .dot{font-size:8px;margin-top:2px;}
+.exercise-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden;}
+.ex-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);}
+.ex-name{font-size:13px;font-weight:700;}
+.ex-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.ex-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.badge-pos{color:var(--accent3);background:#0d2a1a;}
+.week-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;padding:12px 14px;}
+.week-cell{text-align:center;}
+.week-label{font-size:9px;color:#444;margin-bottom:3px;letter-spacing:1px;}
+.week-input{width:100%;padding:6px 2px;background:#111;border:1px solid #2a2a2a;border-radius:6px;color:#333;font-size:12px;text-align:center;font-family:Georgia,serif;outline:none;}
+.week-input.filled{background:#1a2a1a;border-color:rgba(42,232,122,0.3);color:var(--text);}
+.ex-detail-toggle{width:100%;padding:10px 14px;background:#111;border:none;border-top:1px solid var(--border);color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:Georgia,serif;text-align:left;display:flex;justify-content:space-between;}
+.ex-detail-content{display:none;padding:14px;border-top:1px solid var(--border);background:#111;}
+.ex-detail-content.open{display:block;}
+.ex-how{font-size:12px;color:#ccc;line-height:1.9;margin-bottom:10px;padding-left:16px;}
+.ex-how li{margin-bottom:3px;}
+.ex-error{font-size:11px;color:#e8622a;background:#1a0d0d;border-radius:6px;padding:8px 10px;margin-bottom:10px;}
+.ex-video{display:inline-block;font-size:11px;color:var(--accent2);text-decoration:none;background:#0d1a2a;border-radius:6px;padding:6px 10px;}
+.sub-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;overflow-x:auto;scrollbar-width:none;}
+.sub-tabs::-webkit-scrollbar{display:none;}
+.sub-tab{flex-shrink:0;padding:11px 14px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:Georgia,serif;margin-right:6px;}
+.sub-tab.active{color:var(--text);}
+.meal-day-scroll{display:flex;gap:8px;overflow-x:auto;padding:14px 16px 10px;background:#111;border-bottom:1px solid var(--border);scrollbar-width:none;}
+.meal-day-scroll::-webkit-scrollbar{display:none;}
+.meal-day-btn{flex-shrink:0;padding:8px 16px;background:var(--surface2);border:none;border-radius:20px;color:var(--muted);font-size:12px;cursor:pointer;font-family:Georgia,serif;}
+.meal-day-btn.active{background:var(--text);color:#111;font-weight:700;}
+.meal-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+.meal-block-header{padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;}
+.meal-block-body{padding:12px 14px;}
+.meal-item{font-size:13px;color:#ccc;padding:4px 0;border-bottom:1px solid #1e1e1e;}
+.meal-item:last-child{border-bottom:none;}
+.meal-plat{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.meal-prep{font-size:12px;color:var(--muted);line-height:1.7;font-style:italic;}
+.alt-section{background:#111;border-top:1px solid var(--border);padding:12px 14px;}
+.alt-title{font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.alt-item{font-size:12px;color:#aaa;padding:3px 0;}
+.plaisir-banner{background:linear-gradient(135deg,#1a1a0a,#2a2a0a);border:1px solid #4a4a1a;border-radius:10px;padding:14px;margin-top:8px;font-size:12px;color:#aaa;line-height:1.7;}
+.budget-bar{background:var(--green);border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.budget-label{font-size:10px;color:#6aaa6a;letter-spacing:2px;text-transform:uppercase;}
+.budget-val{font-size:24px;font-weight:700;color:var(--text);}
+.check-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #1e1e1e;cursor:pointer;}
+.check-item:last-child{border-bottom:none;}
+.checkbox{width:22px;height:22px;border-radius:6px;flex-shrink:0;background:#111;border:2px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.2s;}
+.checkbox.checked{background:var(--green);border-color:var(--green);}
+.check-label{font-size:13px;color:#ccc;}
+.check-label.checked{text-decoration:line-through;color:#444;}
+.weight-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.weight-cell label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px;}
+.weight-input-wrap{display:flex;align-items:center;gap:3px;}
+.weight-input{width:100%;padding:10px 6px;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:var(--text);font-size:14px;text-align:center;font-family:Georgia,serif;outline:none;}
+.weight-input.filled{background:#0d2a0d;border-color:rgba(42,232,122,0.3);}
+.weight-unit{font-size:9px;color:#444;}
+.evo-bar{border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
+.conseil-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.conseil-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.conseil-icon{font-size:20px;}
+.conseil-title{font-size:14px;font-weight:700;color:var(--text);}
+.conseil-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.conseil-body{padding:14px 16px;}
+.conseil-item{font-size:12px;color:#ccc;padding:6px 0;border-bottom:1px solid #1e1e1e;line-height:1.7;display:flex;gap:8px;}
+.conseil-item:last-child{border-bottom:none;}
+.conseil-dot{color:var(--gold);flex-shrink:0;}
+.phase-card{background:#111;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid;}
+.saison-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.saison-card{background:#111;border:1px solid var(--border);border-radius:10px;padding:12px;}
+.saison-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.saison-item{font-size:12px;color:#aaa;padding:2px 0;}
+.home-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.stat-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.stat-val{font-size:22px;font-weight:700;color:var(--text);}
+.stat-unit{font-size:11px;color:var(--muted);}
+.quick-link{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.quick-link-left{display:flex;align-items:center;gap:12px;}
+.quick-icon{font-size:22px;}
+.quick-title{font-size:14px;font-weight:700;color:var(--text);}
+.quick-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.section-title{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;margin-top:4px;}
+.bilan-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.bilan-row{display:flex;justify-content:space-between;padding:7px 14px;border-top:1px solid #1a1a1a;font-size:12px;}
+.bilan-name{color:var(--muted);}
+.prog-pos{color:var(--accent3);font-weight:700;}
+.prog-none{color:#333;font-weight:700;}
+.rules-card{background:#111;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:6px;}
+.rules-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.rule{font-size:12px;color:var(--muted);padding:4px 0;line-height:1.6;}
+.warm-section{background:#1a1000;border:1px solid #3a2a00;border-radius:10px;padding:14px;margin-bottom:12px;}
+.warm-title{font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;}
+.warm-item{font-size:12px;color:#ccc;padding:4px 0;border-bottom:1px solid #2a2000;line-height:1.6;}
+.warm-item:last-child{border-bottom:none;}
+.proteine-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1e1e1e;font-size:12px;}
+.proteine-bar:last-child{border-bottom:none;}
+.proteine-name{color:#aaa;}
+.proteine-val{color:var(--accent3);font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- ACCUEIL -->
+<div id="s-home" class="section active">
+  <div class="header">
+    <div class="header-label">Wilfried · 26 ans · 1m88</div>
+    <div class="header-title">Mon Programme</div>
+    <div class="header-sub">Remise en forme · Perte de poids</div>
+  </div>
+  <div class="content">
+    <div class="section-title">Mes stats de départ</div>
+    <div class="home-stats">
+      <div class="stat-card"><div class="stat-label">Poids départ</div><div class="stat-val">111,2 <span class="stat-unit">kg</span></div></div>
+      <div class="stat-card"><div class="stat-label">Objectif</div><div class="stat-val">–20 <span class="stat-unit">kg</span></div></div>
+      <div class="stat-card"><div class="stat-label">Séances / sem.</div><div class="stat-val">3 <span class="stat-unit">jours</span></div></div>
+      <div class="stat-card"><div class="stat-label">Budget repas</div><div class="stat-val">200 <span class="stat-unit">€/mois</span></div></div>
+    </div>
+    <div class="section-title">Accès rapide</div>
+    <div class="quick-link" onclick="showSection('sport');setDayTab('j1')">
+      <div class="quick-link-left"><span class="quick-icon">💪</span><div><div class="quick-title">Programme Sport</div><div class="quick-sub">3 jours · Échauffement · Étirements</div></div></div>
+      <span style="color:var(--muted);font-size:16px">›</span>
+    </div>
+    <div class="quick-link" onclick="showSection('repas');setMealDay(0)">
+      <div class="quick-link-left"><span class="quick-icon">🥗</span><div><div class="quick-title">Programme Repas</div><div class="quick-sub">7 jours · Alternatives · Saison</div></div></div>
+      <span style="color:var(--muted);font-size:16px">›</span>
+    </div>
+    <div class="quick-link" onclick="showSection('conseils')">
+      <div class="quick-link-left"><span class="quick-icon">💡</span><div><div class="quick-title">Conseils & Progression</div><div class="quick-sub">Alimentation · Sport · Sommeil</div></div></div>
+      <span style="color:var(--muted);font-size:16px">›</span>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-header" style="color:#6a9c6a">📅 Planning quotidien type</div>
+      <div class="card-body">
+        <div style="font-size:13px;color:#aaa;line-height:2.1">
+          🌅 <strong style="color:var(--text)">6h45</strong> Réveil + grand verre d'eau<br>
+          🧘 <strong style="color:var(--text)">7h00–7h05</strong> Échauffement 5 min<br>
+          💪 <strong style="color:var(--text)">7h05–7h40</strong> Séance (L / Me / Ve)<br>
+          🧊 <strong style="color:var(--text)">7h40–7h45</strong> Étirements 5 min<br>
+          🚿 <strong style="color:var(--text)">7h45–8h00</strong> Douche<br>
+          🍳 <strong style="color:var(--text)">8h00–8h20</strong> Petit déjeuner<br>
+          🚶 <strong style="color:var(--text)">8h20</strong> Marche au boulot 20 min<br>
+          🚶 <strong style="color:var(--text)">18h00</strong> Retour à pied<br>
+          🍽️ <strong style="color:var(--text)">19h30</strong> Dîner léger<br>
+          😮‍💨 <strong style="color:var(--text)">23h00</strong> Cohérence cardiaque 5 min
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SPORT -->
+<div id="s-sport" class="section">
+  <div class="header">
+    <div class="header-label">Programme</div>
+    <div class="header-title">Suivi Sport</div>
+    <div class="header-sub">8 semaines · Débutant · 3 jours/semaine</div>
+  </div>
+  <div class="day-tabs">
+    <button class="day-tab active" id="tab-warm" onclick="setDayTab('warm')" style="border-bottom-color:var(--gold)">🧘<div class="dot" style="color:var(--gold)">Échauff.</div></button>
+    <button class="day-tab" id="tab-j1" onclick="setDayTab('j1')">J1<div class="dot" style="color:#e8622a">Haut</div></button>
+    <button class="day-tab" id="tab-j2" onclick="setDayTab('j2')">J2<div class="dot" style="color:#2a7ae8">Dos</div></button>
+    <button class="day-tab" id="tab-j3" onclick="setDayTab('j3')">J3<div class="dot" style="color:#2ae87a">Abdos</div></button>
+    <button class="day-tab" id="tab-poids" onclick="setDayTab('poids')">⚖️<div class="dot">Poids</div></button>
+    <button class="day-tab" id="tab-bilan" onclick="setDayTab('bilan')">📊<div class="dot">Bilan</div></button>
+  </div>
+
+  <!-- ÉCHAUFFEMENT -->
+  <div id="sport-warm" class="content">
+    <div class="warm-section">
+      <div class="warm-title">🧘 Échauffement — 5 min avant chaque séance</div>
+      <div class="warm-item">🔄 Rotations de la tête — 10x chaque sens</div>
+      <div class="warm-item">🔄 Rotations des épaules — 10x chaque sens</div>
+      <div class="warm-item">🔄 Rotations des poignets — 10x chaque sens</div>
+      <div class="warm-item">🔄 Rotations des hanches (cercles) — 10x chaque sens</div>
+      <div class="warm-item">🔄 Rotations des genoux — 10x chaque sens</div>
+      <div class="warm-item">🔄 Rotations des chevilles — 10x chaque sens</div>
+      <div class="warm-item">🚶 Marche sur place genoux hauts — 30 secondes</div>
+      <div class="warm-item">🤸 Bras croisés devant/derrière (ouverture poitrine) — 10x</div>
+    </div>
+    <div style="background:#001a10;border:1px solid #003a20;border-radius:10px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--accent3);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700">🧊 Étirements Jour 1 — Haut du corps</div>
+      <div class="warm-item" style="border-color:#003a20">Étirement pectoraux — bras en croix contre un mur, 30 sec</div>
+      <div class="warm-item" style="border-color:#003a20">Étirement épaules — bras croisé devant poitrine, 30 sec chaque côté</div>
+      <div class="warm-item" style="border-color:#003a20">Étirement triceps — bras plié derrière la tête, 30 sec chaque côté</div>
+    </div>
+    <div style="background:#00101a;border:1px solid #002a3a;border-radius:10px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;color:#2a7ae8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700">🧊 Étirements Jour 2 — Dos / Biceps</div>
+      <div class="warm-item" style="border-color:#002a3a">Étirement dos — position enfant à genoux, bras tendus devant, 45 sec</div>
+      <div class="warm-item" style="border-color:#002a3a">Étirement biceps — bras tendu paume vers le haut, 30 sec chaque côté</div>
+      <div class="warm-item" style="border-color:#002a3a">Étirement nuque — tête inclinée sur le côté, 20 sec chaque côté</div>
+    </div>
+    <div style="background:#001a00;border:1px solid #003a00;border-radius:10px;padding:14px;">
+      <div style="font-size:11px;color:var(--accent3);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700">🧊 Étirements Jour 3 — Abdos / Jambes</div>
+      <div class="warm-item" style="border-color:#003a00">Étirement ischio-jambiers — assis jambes tendues, penche-toi en avant, 45 sec</div>
+      <div class="warm-item" style="border-color:#003a00">Étirement quadriceps — debout, pied tiré vers les fesses, 30 sec chaque jambe</div>
+      <div class="warm-item" style="border-color:#003a00">Cobra pour le dos — allongé sur le ventre, pousse sur les bras, 30 sec</div>
+      <div class="warm-item" style="border-color:#003a00">Étirement abdos — allongé sur le dos, genoux ramenés sur la poitrine, 30 sec</div>
+    </div>
+  </div>
+
+  <div id="sport-j1" class="content" style="display:none"><div style="font-size:12px;color:#e8622a;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;font-weight:700">Jour 1 — Haut du corps</div><div id="ex-j1"></div></div>
+  <div id="sport-j2" class="content" style="display:none"><div style="font-size:12px;color:#2a7ae8;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;font-weight:700">Jour 2 — Dos / Biceps</div><div id="ex-j2"></div></div>
+  <div id="sport-j3" class="content" style="display:none"><div style="font-size:12px;color:#2ae87a;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;font-weight:700">Jour 3 — Abdos / Jambes</div><div id="ex-j3"></div></div>
+  <div id="sport-poids" class="content" style="display:none">
+    <div style="font-size:12px;color:#aaa;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-weight:700">Suivi du poids</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Chaque lundi matin à jeun, mêmes conditions.</div>
+    <div class="weight-grid" id="weight-grid"></div>
+    <div id="evo-poids"></div>
+    <div style="margin-top:16px;background:#111;border:1px solid var(--border);border-radius:10px;padding:14px;">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">📸 Photos de progression</div>
+      <div style="font-size:12px;color:#aaa;line-height:1.8">1 photo de face + 1 de profil, même endroit, même lumière, 1 fois par mois. Les photos montrent ce que la balance ne voit pas.</div>
+    </div>
+  </div>
+  <div id="sport-bilan" class="content" style="display:none">
+    <div style="font-size:12px;color:#aaa;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;font-weight:700">Bilan global</div>
+    <div id="bilan-content"></div>
+    <div class="rules-card">
+      <div class="rules-label">Règle de progression</div>
+      <div class="rule">✓ Toutes les 2 semaines : +1–2 répétitions par série</div>
+      <div class="rule">✓ À 15 rép propres → passer au poids supérieur</div>
+      <div class="rule">✓ Forme avant intensité, toujours</div>
+      <div class="rule">✓ 48h de repos minimum entre séances</div>
+      <div class="rule">✓ Si douleur articulaire → stop et adapter</div>
+    </div>
+  </div>
+</div>
+
+<!-- REPAS -->
+<div id="s-repas" class="section">
+  <div class="header">
+    <div class="header-label">Nutrition</div>
+    <div class="header-title">Programme Repas</div>
+    <div class="header-sub">7 jours · Alternatives · Fruits & Légumes de saison</div>
+  </div>
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="setRepasTab('programme',this)">Programme</button>
+    <button class="sub-tab" onclick="setRepasTab('courses',this)">Courses</button>
+    <button class="sub-tab" onclick="setRepasTab('saison',this)">Saisons</button>
+  </div>
+  <div id="repas-programme">
+    <div class="meal-day-scroll" id="meal-days"></div>
+    <div class="content" id="meal-content"></div>
+  </div>
+  <div id="repas-courses" style="display:none">
+    <div class="content">
+      <div class="budget-bar">
+        <div><div class="budget-label">Budget estimé semaine</div><div class="budget-val">~45–50 €</div></div>
+        <div style="text-align:right"><div class="budget-label">Cochés</div><div class="budget-val" id="check-count">0/0</div></div>
+      </div>
+      <div id="courses-list"></div>
+    </div>
+  </div>
+  <div id="repas-saison" style="display:none">
+    <div class="content" id="saison-content"></div>
+  </div>
+</div>
+
+<!-- CONSEILS -->
+<div id="s-conseils" class="section">
+  <div class="header">
+    <div class="header-label">Conseils & Progression</div>
+    <div class="header-title">Mes Conseils</div>
+    <div class="header-sub">Alimentation · Sport · Sommeil · Avenir</div>
+  </div>
+  <div class="content">
+
+    <div class="conseil-card">
+      <div class="conseil-header"><span class="conseil-icon">📅</span><div><div class="conseil-title">Plan de progression — 3 phases</div><div class="conseil-sub">Ta feuille de route sur 18–24 mois</div></div></div>
+      <div class="conseil-body">
+        <div class="phase-card" style="border-left-color:#e8622a"><div style="font-size:12px;font-weight:700;color:#e8622a;margin-bottom:6px">Phase 1 — 0 à 3 mois : Maison</div><div style="font-size:12px;color:#aaa;line-height:1.7">Sport 3 jours/semaine · Marche quotidienne · Alimentation ajustée · Objectif : recréer l'habitude et perdre les premiers kilos</div></div>
+        <div class="phase-card" style="border-left-color:#2a7ae8"><div style="font-size:12px;font-weight:700;color:#2a7ae8;margin-bottom:6px">Phase 2 — 3 à 6 mois : Maison + Piscine</div><div style="font-size:12px;color:#aaa;line-height:1.7">Ajouter 1–2 séances natation/semaine · Zéro impact articulaire · Premiers vrais changements visuels · Marche/course alternée (Couch to 5K)</div></div>
+        <div class="phase-card" style="border-left-color:#2ae87a"><div style="font-size:12px;font-weight:700;color:#2ae87a;margin-bottom:6px">Phase 3 — 6 mois+ : Salle de sport</div><div style="font-size:12px;color:#aaa;line-height:1.7">Musculation sérieuse · Course continue 5 km · Élastique 15 kg intégré · L'objectif visuel devient vraiment accessible</div></div>
+      </div>
+    </div>
+
+    <div class="conseil-card">
+      <div class="conseil-header"><span class="conseil-icon">🥤</span><div><div class="conseil-title">Besoins en protéines</div><div class="conseil-sub">130–150g par jour pour toi</div></div></div>
+      <div class="conseil-body">
+        <div class="proteine-bar"><span class="proteine-name">Skyr 150g</span><span class="proteine-val">~17g</span></div>
+        <div class="proteine-bar"><span class="proteine-name">2 œufs</span><span class="proteine-val">~12g</span></div>
+        <div class="proteine-bar"><span class="proteine-name">Blanc de poulet 150g</span><span class="proteine-val">~35g</span></div>
+        <div class="proteine-bar"><span class="proteine-name">Steak haché 5% 150g</span><span class="proteine-val">~30g</span></div>
+        <div class="proteine-bar"><span class="proteine-name">Saumon 150g</span><span class="proteine-val">~30g</span></div>
+        <div class="proteine-bar"><span class="proteine-name">Thon au naturel 100g</span><span class="proteine-val">~25g</span></div>
+        <div class="proteine-bar"><span class="proteine-name">Lentilles 100g cuit</span><span class="proteine-val">~9g</span></div>
+        <div style="margin-top:10px;background:#0d2a0d;border-radius:8px;padding:10px;font-size:12px;color:#aaa">✅ Avec ton programme actuel tu es à ~120–140g/jour. Objectif atteint la plupart des jours !</div>
+      </div>
+    </div>
+
+    <div class="conseil-card">
+      <div class="conseil-header"><span class="conseil-icon">🍽️</span><div><div class="conseil-title">Règles alimentation clés</div><div class="conseil-sub">Perdre du poids sans se priver</div></div></div>
+      <div class="conseil-body">
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Règle des 80/20 :</strong> 2 repas plaisir/semaine prévus (vendredi soir + dimanche midi). Pas de culpabilité.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Protéines à chaque repas :</strong> Skyr, œufs, viande, poisson — ça préserve le muscle pendant la perte de poids.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Féculents complets :</strong> riz/pâtes/pain complet — cale plus longtemps, moins de fringales.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Dîner léger :</strong> soupe ou salade le soir — le corps stocke moins si l'estomac est léger la nuit.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Fruits de saison :</strong> voir l'onglet Saisons dans les Repas — moins cher et meilleur goût.</span></div>
+      </div>
+    </div>
+
+    <div class="conseil-card">
+      <div class="conseil-header"><span class="conseil-icon">🍕</span><div><div class="conseil-title">Gérer la mal bouffe</div><div class="conseil-sub">Sans culpabiliser</div></div></div>
+      <div class="conseil-body">
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Fast food :</strong> max 1 fois/semaine, de préférence le midi plutôt que le soir.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Nutella/céréales :</strong> ok en petite quantité, pas tous les jours.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Alcool :</strong> très calorique, freine la perte de poids — à limiter au maximum.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Après un écart :</strong> repas léger le lendemain matin, pas de culpabilité, on repart direct.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Sodas :</strong> tu bois déjà de l'eau ✅ — c'est l'un des meilleurs réflexes.</span></div>
+      </div>
+    </div>
+
+    <div class="conseil-card">
+      <div class="conseil-header"><span class="conseil-icon">😴</span><div><div class="conseil-title">Améliorer le sommeil</div><div class="conseil-sub">Pour tes insomnies</div></div></div>
+      <div class="conseil-body">
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Cohérence cardiaque :</strong> 5 sec inspire / 5 sec expire pendant 5 min avant de dormir. Très efficace.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Sport le matin :</strong> améliore progressivement le sommeil — évite le soir qui retarde l'endormissement.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Heure fixe :</strong> même heure de coucher tous les jours, même le weekend.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Chambre fraîche :</strong> 18–19°C favorise l'endormissement.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Lumière le matin :</strong> ouvre les volets dès le réveil — régule l'horloge interne.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Patience :</strong> 3–4 semaines de routine régulière avant de voir l'amélioration.</span></div>
+      </div>
+    </div>
+
+    <div class="conseil-card">
+      <div class="conseil-header"><span class="conseil-icon">💧</span><div><div class="conseil-title">Hydratation</div><div class="conseil-sub">Simple mais essentiel</div></div></div>
+      <div class="conseil-body">
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Objectif :</strong> 2L minimum par jour, plus les jours de sport.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Au réveil :</strong> grand verre d'eau avant la séance — les insomnies déshydratent.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Eau gazeuse + sirop citron :</strong> parfait ✅ — continue comme ça.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Pendant la séance :</strong> boire toutes les 10–15 min même si pas soif.</span></div>
+      </div>
+    </div>
+
+    <div class="conseil-card">
+      <div class="conseil-header"><span class="conseil-icon">⚖️</span><div><div class="conseil-title">Bien se peser</div><div class="conseil-sub">Pour un suivi fiable</div></div></div>
+      <div class="conseil-body">
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">1 fois/semaine :</strong> le lundi matin à jeun, après les toilettes, en sous-vêtements.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Balance connectée :</strong> les % sont indicatifs (±3–5%). Ce qui compte c'est la tendance.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Objectif réaliste :</strong> –1 kg/mois en moyenne. Les vêtements changent avant la balance.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">Photos mensuelles :</strong> face + profil, même endroit, même lumière — bien plus parlant que la balance.</span></div>
+      </div>
+    </div>
+
+    <div class="conseil-card">
+      <div class="conseil-header"><span class="conseil-icon">🏃</span><div><div class="conseil-title">Reprendre la course</div><div class="conseil-sub">Progression en 3 étapes</div></div></div>
+      <div class="conseil-body">
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">0–3 mois :</strong> Marche rapide uniquement — 2×30 min/semaine le soir. Zéro impact.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">3–6 mois :</strong> Méthode Couch to 5K — 1 min course / 2 min marche, progressif sur 8 semaines.</span></div>
+        <div class="conseil-item"><span class="conseil-dot">▸</span><span><strong style="color:var(--text)">6 mois+ :</strong> Course continue. Objectif : 5 km sans s'arrêter.</span></div>
+        <div style="margin-top:10px;font-size:11px;color:#e8622a;background:#1a0d0d;border-radius:6px;padding:8px 10px">⚠️ Pas de course avant 3 mois — à 111 kg l'impact sur les genoux est trop important pour débuter.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SOINS -->
+<div id="s-soins" class="section">
+  <div class="header">
+    <div class="header-label">Glow Up</div>
+    <div class="header-title">Routine Soins</div>
+    <div class="header-sub">Visage · Barbe · Mains · Corps · Lèvres</div>
+  </div>
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="setSoinsTab('routine',this)">Routine</button>
+    <button class="sub-tab" onclick="setSoinsTab('courses',this)">Courses</button>
+  </div>
+
+  <!-- ROUTINE -->
+  <div id="soins-routine">
+    <div class="content">
+
+      <!-- MATIN -->
+      <div class="conseil-card">
+        <div class="conseil-header"><span class="conseil-icon">🌅</span><div><div class="conseil-title">Routine Matin</div><div class="conseil-sub">Après la douche · ~5 min</div></div></div>
+        <div class="conseil-body">
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">1</span><span><strong style="color:var(--text)">Gel nettoyant visage</strong> — élimine le sébum accumulé la nuit. Rincer à l'eau froide pour resserrer les pores.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">2</span><span><strong style="color:var(--text)">Lotion tonique Niacinamide 5%</strong> — sur coton, appliquer sur tout le visage. Attaquer les points noirs et unifier le teint.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">3</span><span><strong style="color:var(--text)">Sérum acide hyaluronique</strong> — quelques gouttes, tapoter sur visage légèrement humide pour maximiser l'absorption.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">4</span><span><strong style="color:var(--text)">Crème hydratante SPF 50</strong> — Neutrogena Hydro Boost. Protection solaire indispensable même en hiver.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">5</span><span><strong style="color:var(--text)">Huile barbe Sapiens</strong> — quelques gouttes dans la paume, frotter et appliquer sur barbe humide.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">6</span><span><strong style="color:var(--text)">Crème mains</strong> — après t'être habillé, Neutrogena Hand Cream. S'absorbe vite, pas de film gras.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">7</span><span><strong style="color:var(--text)">Baume lèvres SPF</strong> — Labello Sun Protect. Les lèvres prennent aussi le soleil.</span></div>
+        </div>
+      </div>
+
+      <!-- JOURNÉE -->
+      <div class="conseil-card">
+        <div class="conseil-header"><span class="conseil-icon">☀️</span><div><div class="conseil-title">Dans la journée</div><div class="conseil-sub">Gestes simples au boulot</div></div></div>
+        <div class="conseil-body">
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Crème mains après chaque lavage</strong> — tu le fais déjà ✅ Continue comme ça, c'est excellent.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Baume lèvres</strong> — renouveler si tu sens tes lèvres sèches dans la journée.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Boire 2L d'eau</strong> — la meilleure crème du monde ne remplace pas l'hydratation de l'intérieur.</span></div>
+        </div>
+      </div>
+
+      <!-- SOIR -->
+      <div class="conseil-card">
+        <div class="conseil-header"><span class="conseil-icon">🌙</span><div><div class="conseil-title">Routine Soir</div><div class="conseil-sub">Avant de dormir · ~5 min</div></div></div>
+        <div class="conseil-body">
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">1</span><span><strong style="color:var(--text)">Gel nettoyant visage</strong> — obligatoire, élimine pollution, sébum et résidus de la journée.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">2</span><span><strong style="color:var(--text)">Lotion tonique Niacinamide 5%</strong> — sur coton, même routine que le matin.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">3</span><span><strong style="color:var(--text)">Gel Aloe Vera BIO</strong> — remplace la crème hydratante le soir. Plus léger, laisse la peau respirer et se régénérer la nuit.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">4</span><span><strong style="color:var(--text)">Huile barbe Sapiens</strong> — le soir c'est le meilleur moment, agit toute la nuit pendant que tu dors.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">5</span><span><strong style="color:var(--text)">Crème mains généreuse</strong> — les mains ne sont plus sollicitées, c'est là que ça agit le mieux.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">6</span><span><strong style="color:var(--text)">Vaseline sur les lèvres</strong> — fine couche avant de dormir. Lèvres douces garanties au réveil 😄</span></div>
+        </div>
+      </div>
+
+      <!-- 2x PAR SEMAINE -->
+      <div class="conseil-card">
+        <div class="conseil-header"><span class="conseil-icon">📅</span><div><div class="conseil-title">2× par semaine</div><div class="conseil-sub">Mercredi + Samedi par exemple</div></div></div>
+        <div class="conseil-body">
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Gommage visage</strong> — après le gel nettoyant, masser doucement en cercles, rincer. Élimine les cellules mortes et désincruste les points noirs.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Exfoliant lèvres</strong> — frotter doucement avec une brosse à dents souple humide, puis appliquer vaseline. Lèvres lisses en 1 min.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Aloe Vera sur le corps</strong> — coudes, genoux, zones sèches. Appliquer sur peau légèrement humide après douche pour une meilleure absorption.</span></div>
+        </div>
+      </div>
+
+      <!-- CONSEIL BARBE -->
+      <div class="conseil-card">
+        <div class="conseil-header"><span class="conseil-icon">🧔</span><div><div class="conseil-title">Entretien barbe courte</div><div class="conseil-sub">Conseils pour une barbe soignée</div></div></div>
+        <div class="conseil-body">
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Huile barbe Sapiens le soir</strong> — quelques gouttes sur barbe propre et légèrement humide après douche.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Baume barbe le matin</strong> — pour coiffer et maintenir. Proraso ou Nivea Men Sensitive.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Nettoyage barbe</strong> — passe le gel nettoyant sur la barbe aussi quand tu te laves le visage.</span></div>
+          <div class="conseil-item"><span style="color:#c8a040;flex-shrink:0">▸</span><span><strong style="color:var(--text)">Barbier</strong> — 1 fois par mois pour l'entretien et les contours. Un bon barbier à Clermont te conseillera aussi sur les produits.</span></div>
+        </div>
+      </div>
+
+      <!-- NOTE AROMA ZONE -->
+      <div style="background:#0d1a0d;border:1px solid #1a3a1a;border-radius:12px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--accent3);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700">🌿 Pourquoi Aroma Zone ?</div>
+        <div style="font-size:12px;color:#aaa;line-height:1.8">Transparence totale sur les ingrédients · Naturel et clean · Prix compétitifs · Cohérent avec ta démarche alimentation saine. Pour le SPF → pharmacie uniquement car les formules protectrices y sont supérieures.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COURSES SOINS -->
+  <div id="soins-courses" style="display:none">
+    <div class="content">
+      <div class="budget-bar" style="background:#1a0d2a;border:1px solid #3a1a4a;">
+        <div><div class="budget-label" style="color:#9a6aaa">Budget estimé</div><div class="budget-val">~37 €</div></div>
+        <div style="text-align:right"><div class="budget-label" style="color:#9a6aaa">Cochés</div><div class="budget-val" id="soins-check-count">0/0</div></div>
+      </div>
+
+      <!-- AROMA ZONE -->
+      <div class="card">
+        <div class="card-header" style="color:var(--accent3)">🌿 Aroma Zone — aroma-zone.com</div>
+        <div class="card-body" id="soins-az"></div>
+      </div>
+
+      <!-- PHARMACIE -->
+      <div class="card">
+        <div class="card-header" style="color:#2a7ae8">💊 Pharmacie / Parapharmacie</div>
+        <div class="card-body" id="soins-pharma"></div>
+      </div>
+
+      <!-- GRANDE SURFACE -->
+      <div class="card">
+        <div class="card-header" style="color:var(--gold)">🛒 Grande surface</div>
+        <div class="card-body" id="soins-gs"></div>
+      </div>
+
+      <!-- DÉJÀ -->
+      <div class="card">
+        <div class="card-header" style="color:var(--accent3)">✅ Tu as déjà</div>
+        <div class="card-body">
+          <div style="font-size:13px;color:#aaa;padding:6px 0;border-bottom:1px solid #1e1e1e">✅ Huile barbe Sapiens</div>
+          <div style="font-size:13px;color:#aaa;padding:6px 0;border-bottom:1px solid #1e1e1e">✅ Gel nettoyant visage</div>
+          <div style="font-size:13px;color:#aaa;padding:6px 0">✅ Crème hydratante (à remplacer progressivement par SPF)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showSection('home')" id="nav-home"><span class="icon">🏠</span><span>Accueil</span><span class="nav-dot"></span></button>
+  <button class="nav-btn" onclick="showSection('sport')" id="nav-sport"><span class="icon">💪</span><span>Sport</span></button>
+  <button class="nav-btn" onclick="showSection('repas')" id="nav-repas"><span class="icon">🥗</span><span>Repas</span></button>
+  <button class="nav-btn" onclick="showSection('conseils')" id="nav-conseils"><span class="icon">💡</span><span>Conseils</span></button>
+  <button class="nav-btn" onclick="showSection('soins')" id="nav-soins"><span class="icon">✨</span><span>Soins</span></button>
+</nav>
+
+<script>
+const WEEKS=['S1','S2','S3','S4','S5','S6','S7','S8'];
+
+const sportData={
+  j1:{color:'#e8622a',exercises:[
+    {name:'Pompes sur les genoux',sets:3,start:8,unit:'rép',how:['Mains à largeur d\'épaules, genoux au sol','Corps aligné de la tête aux genoux — pas les fesses en l\'air','Descends jusqu\'à ce que la poitrine frôle le sol','Remonte en soufflant'],error:'⚠️ Erreur : laisser le bas du dos se creuser ou les fesses monter.',video:'pompes+genoux+débutant'},
+    {name:'Développé haltères 2kg',sets:3,start:10,unit:'rép',how:['Allongé sur le dos sur le tapis','Haltères à hauteur de poitrine, coudes à 45°','Pousse vers le haut en soufflant','Redescends lentement jusqu\'à sentir l\'étirement'],error:'⚠️ Erreur : écarter trop les coudes — stress excessif sur les épaules.',video:'développé+couché+haltères+sol+débutant'},
+    {name:'Élévations latérales 1kg',sets:3,start:10,unit:'rép',how:['Debout, dos droit, haltères le long du corps','Monte les bras sur les côtés jusqu\'à hauteur des épaules','Légère flexion des coudes — pas les bras rigides','Redescends lentement en contrôlant'],error:'⚠️ Erreur : se balancer avec le dos. Mouvement lent et contrôlé uniquement.',video:'élévations+latérales+haltères+épaules'},
+    {name:'Écartés haltères 2kg',sets:3,start:10,unit:'rép',how:['Allongé sur le dos, haltères bras tendus au-dessus','Ouvre les bras en arc de cercle, légère flexion coudes','Descends jusqu\'à sentir l\'étirement pectoraux','Remonte comme si tu "enlaçais un arbre"'],error:'⚠️ Erreur : descendre trop bas ou tendre complètement les coudes.',video:'écarté+haltères+sol+pectoraux+débutant'},
+  ]},
+  j2:{color:'#2a7ae8',exercises:[
+    {name:'Rowing haltère 2kg',sets:3,start:10,unit:'rép/côté',how:['Un genou et une main sur une chaise ou le canapé','Dos parallèle au sol, bien plat','Tire l\'haltère vers la hanche, coude près du corps','Redescends lentement'],error:'⚠️ Erreur : tourner le dos pour prendre de l\'élan. Mouvement uniquement bras.',video:'rowing+haltère+un+bras+débutant'},
+    {name:'Curl biceps 2kg',sets:3,start:12,unit:'rép',how:['Debout, dos droit, paumes vers l\'avant','Fléchis les coudes pour monter vers les épaules','Coudes collés au corps — ils ne bougent pas','Redescends lentement en contrôlant'],error:'⚠️ Erreur : balancer le dos en arrière pour aider.',video:'curl+biceps+haltères+débutant'},
+    {name:'Curl marteau 1kg',sets:3,start:12,unit:'rép',how:['Même position mais paumes face à face','Monte les haltères alternativement ou ensemble','Coudes toujours collés au corps','Travaille biceps ET avant-bras'],error:'⚠️ Erreur : tourner les poignets en cours de mouvement.',video:'curl+marteau+haltères'},
+    {name:'Traction assistée',sets:3,start:5,unit:'rép',how:['Barre de porte à hauteur de poitrine','Assis ou accroupi sous la barre, pieds au sol','Tire vers ta poitrine en serrant les omoplates','Les pieds servent à alléger le poids'],error:'⚠️ Erreur : pousser trop fort avec les jambes. C\'est le dos qui doit travailler.',video:'traction+assistée+débutant+barre+porte'},
+  ]},
+  j3:{color:'#2ae87a',exercises:[
+    {name:'Gainage genoux',sets:3,start:20,unit:'sec',how:['Avant-bras au sol, genoux posés','Corps aligné de la tête aux genoux','Contracte ventre et fesses','Respire normalement, tiens 20 secondes'],error:'⚠️ Erreur : laisser les hanches monter ou descendre.',video:'gainage+genoux+débutant'},
+    {name:'Crunchs',sets:3,start:12,unit:'rép',how:['Allongé sur le dos, genoux fléchis, pieds à plat','Mains derrière la tête sans tirer sur le cou','Contracte le ventre pour soulever les épaules','Redescends lentement sans poser la tête'],error:'⚠️ Erreur : tirer sur la nuque — ça blesse et ne travaille pas les abdos.',video:'crunchs+abdos+débutant+technique'},
+    {name:'Relevés de jambes',sets:3,start:10,unit:'rép',how:['Allongé sur le dos, mains sous les fesses','Jambes tendues, monte-les jusqu\'à 90°','Contracte le ventre pendant tout le mouvement','Redescends lentement sans poser les pieds'],error:'⚠️ Erreur : cambrer le bas du dos en descendant.',video:'relevés+de+jambes+abdos+débutant'},
+    {name:'Squats poids corps',sets:3,start:12,unit:'rép',how:['Pieds largeur d\'épaules, orteils légèrement tournés','Descends comme si tu t\'asseyais sur une chaise','Genoux dans l\'axe des orteils — ne rentrent pas','Remonte en poussant dans les talons'],error:'⚠️ Erreur : genoux qui rentrent vers l\'intérieur et dos qui s\'arrondit.',video:'squat+poids+du+corps+débutant+technique'},
+    {name:'Fentes statiques',sets:3,start:8,unit:'rép/jambe',how:['Un pied devant, l\'autre derrière, dos droit','Descends le genou arrière vers le sol','Genou avant ne dépasse pas la pointe du pied','Remonte en poussant sur le talon avant'],error:'⚠️ Erreur : genou avant qui dépasse les orteils.',video:'fentes+statiques+débutant+technique'},
+  ]},
+};
+
+const repasData=[
+  {day:'Lundi',pj:['Chocolat chaud cacao non sucré','2 tartines pain complet + beurre OU confiture','Skyr nature + framboises surgelées'],snack:['1 pomme + quelques amandes'],
+   dej:{plat:'Poulet rôti + riz complet + haricots verts',prep:'Blancs de poulet à la poêle avec herbes de Provence. Riz complet 20 min. Haricots verts vapeur.',alts:['🔄 Remplacer poulet → escalope de dinde','🔄 Remplacer riz → quinoa ou blé','🔄 Remplacer haricots → brocolis ou courgettes']},
+   din:{plat:'Soupe de légumes maison',prep:'Carottes + courgettes + pommes de terre + bouillon cube. Mixer ou laisser en morceaux.',alts:['🔄 Ajouter lentilles corail pour plus de protéines','🔄 Version estivale : gaspacho tomates/concombre','🔄 Remplacer pommes de terre → patate douce']}},
+  {day:'Mardi',pj:['Chocolat chaud cacao non sucré','2 tartines pain complet + beurre OU confiture','Skyr nature + pomme en morceaux'],snack:['1 œuf dur + tomates cerises'],
+   dej:{plat:'Steak haché 5% + pâtes complètes + salade',prep:'Steak à la poêle sans matière grasse. Pâtes al dente. Vinaigrette huile d\'olive + citron.',alts:['🔄 Remplacer steak → filet de dinde haché','🔄 Remplacer pâtes → riz complet ou lentilles','🔄 Ajouter des tomates cerises dans la salade']},
+   din:{plat:'Salade composée',prep:'Salade + tomates + œuf dur + thon au naturel + vinaigrette légère.',alts:['🔄 Remplacer thon → saumon fumé (léger)','🔄 Ajouter avocat si saison','🔄 Version hivernale : salade tiède avec pois chiches']}},
+  {day:'Mercredi',pj:['Chocolat chaud cacao non sucré','2 tartines pain complet + beurre OU confiture','Skyr nature + framboises'],snack:['Amandes + carré chocolat noir 70%'],
+   dej:{plat:'Filet de saumon + quinoa + brocolis',prep:'Saumon à la poêle ou au four (200°C, 15 min). Quinoa 15 min. Brocolis vapeur.',alts:['🔄 Remplacer saumon → maquereau (moins cher, très nutritif)','🔄 Remplacer quinoa → riz complet','🔄 Remplacer brocolis → haricots verts ou asperges (printemps)']},
+   din:{plat:'Soupe poireaux pommes de terre',prep:'Poireaux + pommes de terre + bouillon cube, cuire 20 min, mixer.',alts:['🔄 Version légère → remplacer pommes de terre par courgettes','🔄 Ajouter un peu de fromage blanc pour l\'onctuosité','🔄 Version été → soupe froide courgette/menthe']}},
+  {day:'Jeudi',pj:['Chocolat chaud cacao non sucré','2 tartines pain complet + beurre OU confiture','Skyr nature + framboises'],snack:['1 pomme + yaourt nature'],
+   dej:{plat:'Escalope de dinde + lentilles + carottes',prep:'Escalope à la poêle. Lentilles vertes 20 min. Carottes en rondelles vapeur.',alts:['🔄 Remplacer dinde → poulet ou porc maigre','🔄 Remplacer lentilles → pois chiches ou haricots blancs','🔄 Ajouter herbes fraîches : persil, coriandre']},
+   din:{plat:'Salade de pâtes complètes',prep:'Pâtes froides + thon + maïs + tomates cerises + vinaigrette.',alts:['🔄 Remplacer thon → poulet froid coupé en dés','🔄 Ajouter concombre et poivron pour plus de fraîcheur','🔄 Remplacer pâtes → riz froid ou quinoa']}},
+  {day:'Vendredi',pj:['Chocolat chaud cacao non sucré','2 tartines pain complet + beurre OU confiture','Skyr nature + framboises'],snack:['Amandes + carré chocolat noir 70%'],
+   dej:{plat:'Poulet mariné + riz complet + courgettes',prep:'Mariner la veille (huile d\'olive, citron, ail). Cuire à la poêle. Courgettes poêlées.',alts:['🔄 Remplacer poulet → crevettes (si pas allergie confirmée)','🔄 Ajouter sauce yaourt + herbes pour accompagner','🔄 Remplacer courgettes → aubergines en saison']},
+   din:{plat:'🎉 Repas plaisir !',prep:'Pizza, burger, ce que tu veux. Tu as bien bossé, profite sans culpabiliser 😄',plaisir:true,alts:[]}},
+  {day:'Samedi',pj:['Chocolat chaud cacao non sucré','2 tartines pain complet + beurre OU confiture','2 œufs brouillés'],snack:['Fruits rouges + Skyr'],
+   dej:{plat:'Côte de porc + patate douce + haricots verts',prep:'Côte de porc au four. Patate douce (200°C, 30 min). Haricots vapeur.',alts:['🔄 Remplacer porc → poulet entier rôti','🔄 Remplacer patate douce → pommes de terre nouvelles (printemps)','🔄 Ajouter une sauce moutarde/miel maison']},
+   din:{plat:'Soupe ou salade légère selon saison',prep:'Soupe de légumes si hiver, salade composée si été.',alts:['🔄 Version printemps : salade d\'asperges + œuf poché','🔄 Version été : gaspacho + croûtons de pain complet','🔄 Version hiver : velouté de potimarron']}},
+  {day:'Dimanche',pj:['Chocolat chaud cacao non sucré','2 tartines pain complet + beurre OU confiture','Skyr + framboises + filet de miel'],snack:['1 pomme + beurre de cacahuète sur tartine'],
+   dej:{plat:'🍖 Repas plaisir / familial !',prep:'Le dimanche c\'est le jour du plaisir. Régale-toi sans te priver.',plaisir:true,alts:[]},
+   din:{plat:'Restes ou soupe légère',prep:'Léger le soir pour bien démarrer la semaine suivante.',alts:['🔄 Restes du repas de midi réchauffés','🔄 Soupe express : légumes + bouillon 15 min','🔄 Omelette aux herbes légère']}},
+];
+
+const saisonData=[
+  {saison:'🌸 Printemps (mars–mai)',color:'#e87a2a',fruits:['Fraises 🍓','Cerises 🍒','Rhubarbe','Premières framboises','Kiwis (fin de saison)'],legumes:['Asperges vertes et blanches','Petits pois','Radis','Épinards','Fèves','Artichauds','Laitue et salades']},
+  {saison:'☀️ Été (juin–août)',color:'#e8c02a',fruits:['Fraises 🍓','Framboises 🫐','Myrtilles','Pêches 🍑','Nectarines','Abricots','Pastèque 🍉','Melon 🍈','Cerises','Prunes'],legumes:['Tomates 🍅','Courgettes','Aubergines','Poivrons','Concombres','Haricots verts','Maïs','Basilic frais']},
+  {saison:'🍂 Automne (sept–nov)',color:'#e8622a',fruits:['Pommes 🍎','Poires 🍐','Raisins 🍇','Figues','Coings','Châtaignes','Kiwis'],legumes:['Potimarron','Courges','Champignons 🍄','Poireaux','Endives','Choux','Betteraves','Céleri']},
+  {saison:'❄️ Hiver (déc–fév)',color:'#2a7ae8',fruits:['Clémentines 🍊','Oranges','Pamplemousse','Pommes 🍎','Poires 🍐','Kiwis','Bananes'],legumes:['Poireaux','Choux de Bruxelles','Brocolis','Chou-fleur','Carottes 🥕','Panais','Navets','Épinards','Mâche']},
+];
+
+const coursesData=[
+  {rayon:'🥩 Viandes / Poissons',items:['Blancs de poulet ×4','Steak haché 5% ×2','Escalopes de dinde ×2','Filet de saumon ×2','Côte de porc ×2']},
+  {rayon:'🥦 Fruits & Légumes (marché)',items:['Courgettes ×3','Brocolis ×1','Haricots verts','Carottes ×1 botte','Tomates cerises ×1 barquette','Salade verte ×2','Poireaux ×2','Patates douces ×2','Pommes de terre ×1 filet','Ail ×1 tête','Citrons ×3','Pommes ×4','Framboises (si pas surgelées)']},
+  {rayon:'🥛 Produits laitiers',items:['Skyr nature ×6 ou grand pot','Œufs ×12','Yaourt nature ×4']},
+  {rayon:'🌾 Épicerie',items:['Riz complet','Pâtes complètes','Quinoa','Lentilles vertes','Thon au naturel ×4','Maïs ×1 boîte','Bouillon cube légumes','Pain complet','Cacao non sucré','Chocolat noir 70%','Amandes nature','Huile d\'olive']},
+  {rayon:'🧊 Surgelés',items:['Framboises surgelées','Haricots verts surgelés (option éco)']},
+];
+
+let sportReps={},weightData=Array(8).fill(''),checkState={};
+
+function loadState(){try{const s=localStorage.getItem('prog_v3');if(s){const d=JSON.parse(s);sportReps=d.sportReps||{};weightData=d.weightData||Array(8).fill('');checkState=d.checkState||{};}}catch(e){}}
+function saveState(){try{localStorage.setItem('prog_v3',JSON.stringify({sportReps,weightData,checkState}));}catch(e){}}
+
+function showSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>{b.classList.remove('active');const d=b.querySelector('.nav-dot');if(d&&b.id!=='nav-'+name)d.remove();});
+  document.getElementById('s-'+name).classList.add('active');
+  const nb=document.getElementById('nav-'+name);
+  nb.classList.add('active');
+  if(!nb.querySelector('.nav-dot')){const dot=document.createElement('span');dot.className='nav-dot';nb.appendChild(dot);}
+}
+
+function setDayTab(tab){
+  ['warm','j1','j2','j3','poids','bilan'].forEach(t=>{
+    const tb=document.getElementById('tab-'+t);if(tb){tb.classList.remove('active');tb.style.borderBottomColor='transparent';}
+    const el=document.getElementById('sport-'+t);if(el)el.style.display='none';
+  });
+  document.getElementById('tab-'+tab).classList.add('active');
+  const colors={warm:'#c8a040',j1:'#e8622a',j2:'#2a7ae8',j3:'#2ae87a',poids:'#aaa',bilan:'#aaa'};
+  document.getElementById('tab-'+tab).style.borderBottomColor=colors[tab]||'#aaa';
+  document.getElementById('sport-'+tab).style.display='block';
+  if(tab==='bilan')renderBilan();
+  if(tab==='poids')renderPoids();
+}
+
+function toggleDetail(id){
+  const el=document.getElementById(id);
+  const btn=document.getElementById('btn-'+id);
+  if(el.classList.contains('open')){el.classList.remove('open');btn.querySelector('span:last-child').textContent='▾';}
+  else{el.classList.add('open');btn.querySelector('span:last-child').textContent='▴';}
+}
+
+function renderExercises(dayKey){
+  const day=sportData[dayKey];
+  const container=document.getElementById('ex-'+dayKey);
+  container.innerHTML='';
+  day.exercises.forEach((ex,exIdx)=>{
+    const filled=WEEKS.map((_,wi)=>sportReps[`${dayKey}-${exIdx}-${wi}`]).filter(Boolean);
+    let progHTML='';
+    if(filled.length>=2){const diff=parseInt(filled[filled.length-1])-parseInt(filled[0]);progHTML=`<span class="ex-badge badge-pos">${diff>=0?'+':''}${diff} ${ex.unit}</span>`;}
+    const weekCells=WEEKS.map((w,wi)=>{const val=sportReps[`${dayKey}-${exIdx}-${wi}`]||'';return `<div class="week-cell"><div class="week-label">${w}</div><input class="week-input ${val?'filled':''}" type="number" value="${val}" onchange="updateRep('${dayKey}',${exIdx},${wi},this.value)" oninput="this.className='week-input '+(this.value?'filled':'')" placeholder="—"></div>`;}).join('');
+    const detailId=`det-${dayKey}-${exIdx}`;
+    const howList=ex.how.map(h=>`<li>${h}</li>`).join('');
+    const ytUrl=`https://www.youtube.com/results?search_query=${ex.video}`;
+    container.innerHTML+=`<div class="exercise-card"><div class="ex-header"><div><div class="ex-name">${ex.name}</div><div class="ex-sub">${ex.sets} séries · départ ${ex.start} ${ex.unit}</div></div>${progHTML}</div><div class="week-grid">${weekCells}</div><button class="ex-detail-toggle" id="btn-${detailId}" onclick="toggleDetail('${detailId}')"><span>📖 Comment faire</span><span>▾</span></button><div class="ex-detail-content" id="${detailId}"><ul class="ex-how">${howList}</ul><div class="ex-error">${ex.error}</div><a class="ex-video" href="${ytUrl}" target="_blank">🎥 Voir sur YouTube →</a></div></div>`;
+  });
+}
+
+function updateRep(dayKey,exIdx,weekIdx,val){const key=`${dayKey}-${exIdx}-${weekIdx}`;if(val)sportReps[key]=val;else delete sportReps[key];saveState();}
+
+function renderPoids(){
+  const grid=document.getElementById('weight-grid');
+  grid.innerHTML=WEEKS.map((w,i)=>`<div class="weight-cell"><label>${w}</label><div class="weight-input-wrap"><input class="weight-input ${weightData[i]?'filled':''}" type="number" value="${weightData[i]}" placeholder="—" onchange="updateWeight(${i},this.value)" oninput="this.className='weight-input '+(this.value?'filled':'')"><span class="weight-unit">kg</span></div></div>`).join('');
+  const filled=weightData.filter(w=>w!=='').map(Number);
+  const evo=document.getElementById('evo-poids');
+  if(filled.length>=2){const diff=(filled[filled.length-1]-filled[0]).toFixed(1);const isPos=parseFloat(diff)>0;evo.innerHTML=`<div class="evo-bar" style="background:${isPos?'#2a1a0d':'#0d2a1a'}"><span style="font-size:12px;color:var(--muted)">Évolution depuis le début</span><span style="font-size:20px;font-weight:700;color:${isPos?'#e8a02a':'#2ae87a'}">${parseFloat(diff)>0?'+':''}${diff} kg</span></div>`;}
+  else{evo.innerHTML='<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px">Renseigne au moins 2 semaines pour voir l\'évolution</div>';}
+}
+
+function updateWeight(idx,val){weightData[idx]=val;saveState();renderPoids();}
+
+function renderBilan(){
+  let html='';
+  const dayColors={j1:'#e8622a',j2:'#2a7ae8',j3:'#2ae87a'};
+  const dayLabels={j1:'Jour 1 — Haut du corps',j2:'Jour 2 — Dos / Biceps',j3:'Jour 3 — Abdos / Jambes'};
+  Object.keys(sportData).forEach(dk=>{const day=sportData[dk];let rows=day.exercises.map((ex,exIdx)=>{const reps=WEEKS.map((_,wi)=>sportReps[`${dk}-${exIdx}-${wi}`]).filter(Boolean);let prog='—',cls='prog-none';if(reps.length>=2){const diff=parseInt(reps[reps.length-1])-parseInt(reps[0]);prog=(diff>=0?'+':'')+diff+' '+ex.unit;cls='prog-pos';}return `<div class="bilan-row"><span class="bilan-name">${ex.name}</span><span class="${cls}">${prog}</span></div>`;}).join('');html+=`<div class="bilan-card"><div style="padding:10px 14px;font-size:13px;font-weight:700;color:${dayColors[dk]};border-bottom:1px solid #1a1a1a">${dayLabels[dk]}</div>${rows}</div>`;});
+  document.getElementById('bilan-content').innerHTML=html;
+}
+
+function setRepasTab(tab,btn){
+  ['programme','courses','saison'].forEach(t=>{const el=document.getElementById('repas-'+t);if(el)el.style.display='none';});
+  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('repas-'+tab).style.display='block';
+  btn.classList.add('active');
+  if(tab==='courses')renderCourses();
+  if(tab==='saison')renderSaison();
+}
+
+function setMealDay(idx){
+  document.querySelectorAll('.meal-day-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const d=repasData[idx];
+  let html=`<div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:16px">${d.day}</div>`;
+  html+=`<div class="meal-block"><div class="meal-block-header" style="background:#1a1000;color:#c8a040">☀️ Petit déjeuner</div><div class="meal-block-body">${d.pj.map(i=>`<div class="meal-item">· ${i}</div>`).join('')}</div></div>`;
+  html+=`<div class="meal-block"><div class="meal-block-header" style="background:#0d2a0d;color:#2a9a2a">🍎 Snack 10h–12h</div><div class="meal-block-body">${d.snack.map(i=>`<div class="meal-item">· ${i}</div>`).join('')}</div></div>`;
+
+  let dejAlts=d.dej.alts&&d.dej.alts.length?`<div class="alt-section"><div class="alt-title">🔄 Alternatives</div>${d.dej.alts.map(a=>`<div class="alt-item">${a}</div>`).join('')}</div>`:'';
+  html+=`<div class="meal-block"><div class="meal-block-header" style="background:#0d1a2a;color:#2a6aaa">🍽️ Déjeuner</div><div class="meal-block-body"><div class="meal-plat">${d.dej.plat}</div><div class="meal-prep">${d.dej.prep}</div>${d.dej.plaisir?'<div class="plaisir-banner">🎯 Repas plaisir prévu et mérité — règle des 80/20 !</div>':''}</div>${dejAlts}</div>`;
+
+  let dinAlts=d.din.alts&&d.din.alts.length?`<div class="alt-section"><div class="alt-title">🔄 Alternatives</div>${d.din.alts.map(a=>`<div class="alt-item">${a}</div>`).join('')}</div>`:'';
+  html+=`<div class="meal-block"><div class="meal-block-header" style="background:#1a0d2a;color:#7a3aaa">🌙 Dîner</div><div class="meal-block-body"><div class="meal-plat">${d.din.plat}</div><div class="meal-prep">${d.din.prep}</div>${d.din.plaisir?'<div class="plaisir-banner">🎯 Dimanche = jour plaisir !</div>':''}</div>${dinAlts}</div>`;
+
+  document.getElementById('meal-content').innerHTML=html;
+}
+
+function renderMealDays(){
+  document.getElementById('meal-days').innerHTML=repasData.map((d,i)=>`<button class="meal-day-btn ${i===0?'active':''}" onclick="setMealDay(${i})">${d.day}</button>`).join('');
+  setMealDay(0);
+}
+
+function renderSaison(){
+  const now=new Date().getMonth();
+  const currentIdx=now>=2&&now<=4?0:now>=5&&now<=7?1:now>=8&&now<=10?2:3;
+  let html=`<div style="font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px">Fruits & légumes de saison · Préfère le marché !</div>`;
+  saisonData.forEach((s,idx)=>{
+    const isCurrent=idx===currentIdx;
+    html+=`<div style="background:var(--surface);border:1px solid ${isCurrent?s.color:'var(--border)'};border-radius:12px;margin-bottom:12px;overflow:hidden;${isCurrent?'box-shadow:0 0 0 1px '+s.color+'44':''}">`
+    html+=`<div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700;color:${s.color}">${s.saison}</span>${isCurrent?`<span style="font-size:10px;background:${s.color}22;color:${s.color};padding:3px 8px;border-radius:10px;letter-spacing:1px">EN CE MOMENT</span>`:''}</div>`;
+    html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">`;
+    html+=`<div style="padding:12px 14px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🍎 Fruits</div>${s.fruits.map(f=>`<div style="font-size:12px;color:#ccc;padding:3px 0">${f}</div>`).join('')}</div>`;
+    html+=`<div style="padding:12px 14px"><div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🥦 Légumes</div>${s.legumes.map(l=>`<div style="font-size:12px;color:#ccc;padding:3px 0">${l}</div>`).join('')}</div>`;
+    html+=`</div></div>`;
+  });
+  document.getElementById('saison-content').innerHTML=html;
+}
+
+function renderCourses(){
+  let html='',total=0;
+  coursesData.forEach((cat,ci)=>{html+=`<div class="card"><div class="card-header">${cat.rayon}</div><div class="card-body">`;cat.items.forEach((item,ii)=>{total++;const key=`c-${ci}-${ii}`;const checked=checkState[key]||false;html+=`<div class="check-item" onclick="toggleCheck('${key}')"><div class="checkbox ${checked?'checked':''}">${checked?'✓':''}</div><span class="check-label ${checked?'checked':''}">${item}</span></div>`;});html+='</div></div>';});
+  document.getElementById('courses-list').innerHTML=html;
+  const checked=Object.values(checkState).filter(Boolean).length;
+  document.getElementById('check-count').textContent=`${checked}/${total}`;
+  document.getElementById('check-count').style.color=checked===total?'#2ae87a':'var(--text)';
+}
+
+function toggleCheck(key){checkState[key]=!checkState[key];saveState();renderCourses();}
+
+const soinsAZ=[
+  {name:'Lotion Tonique Niacinamide 5% Zinc',prix:'~10€',usage:'Visage matin + soir sur coton — points noirs + pores',url:'https://www.aroma-zone.com/info/fiche-technique/lotion-tonique-niacinamide-zinc-acide-hyaluronique'},
+  {name:'Sérum Acide Hyaluronique concentré',prix:'~8€',usage:'Visage matin + soir après lotion, avant crème',url:'https://www.aroma-zone.com/info/fiche-technique/serum-acide-hyaluronique'},
+  {name:'Gel Aloe Vera BIO natif',prix:'~6€',usage:'Visage soir + corps zones sèches + après rasage',url:'https://www.aroma-zone.com/info/fiche-technique/gel-aloe-vera-natif-bio'},
+  {name:'Gommage visage purifiant',prix:'~8€',usage:'Visage 2x/semaine après nettoyant — points noirs',url:'https://www.aroma-zone.com/'},
+];
+const soinsPharma=[
+  {name:'Neutrogena Hydro Boost SPF 50',prix:'~12€',usage:'Crème visage le matin — protection solaire indispensable',url:'https://www.neutrogena.fr'},
+  {name:'Neutrogena Hand Cream',prix:'~5€',usage:'Crème mains matin + après lavage + généreuse le soir',url:'https://www.neutrogena.fr'},
+];
+const soinsGS=[
+  {name:'Labello Sun Protect SPF 30',prix:'~3€',usage:'Baume lèvres le matin et dans la journée',url:'https://www.labello.com/fr'},
+  {name:'Vaseline pure',prix:'~3€',usage:'Lèvres le soir avant de dormir',url:'https://www.vaseline.fr'},
+  {name:'Proraso Baume à barbe',prix:'~10€',usage:'Barbe le matin pour maintien et nourrissement',url:'https://www.proraso.com/fr'},
+];
+let soinsCheckState={};
+function loadSoinsState(){try{const s=localStorage.getItem('soins_state');if(s)soinsCheckState=JSON.parse(s);}catch(e){}}
+function saveSoinsState(){try{localStorage.setItem('soins_state',JSON.stringify(soinsCheckState));}catch(e){}}
+function setSoinsTab(tab,btn){
+  ['routine','courses'].forEach(t=>{const el=document.getElementById('soins-'+t);if(el)el.style.display='none';});
+  document.querySelectorAll('#s-soins .sub-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('soins-'+tab).style.display='block';
+  btn.classList.add('active');
+  if(tab==='courses')renderSoinsCourses();
+}
+function renderSoinsCourses(){
+  const allItems=[...soinsAZ,...soinsPharma,...soinsGS];
+  const total=allItems.length;
+  const checked=Object.values(soinsCheckState).filter(Boolean).length;
+  document.getElementById('soins-check-count').textContent=`${checked}/${total}`;
+  document.getElementById('soins-check-count').style.color=checked===total?'#2ae87a':'var(--text)';
+  [['az',soinsAZ],['pharma',soinsPharma],['gs',soinsGS]].forEach(([prefix,items])=>{
+    const container=document.getElementById('soins-'+prefix);
+    if(!container)return;
+    container.innerHTML=items.map((item,idx)=>{
+      const key=`${prefix}-${idx}`;
+      const isChecked=soinsCheckState[key]||false;
+      return `<div style="padding:10px 0;border-bottom:1px solid #1e1e1e;cursor:pointer" onclick="toggleSoinsCheck('${key}')">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="width:22px;height:22px;border-radius:6px;flex-shrink:0;background:${isChecked?'var(--green)':'#111'};border:2px solid ${isChecked?'var(--green)':'#3a3a3a'};display:flex;align-items:center;justify-content:center;font-size:13px;margin-top:2px">${isChecked?'✓':''}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;color:${isChecked?'#444':'#f0ece4'};text-decoration:${isChecked?'line-through':'none'};font-weight:600">${item.name} <span style="color:var(--accent3)">${item.prix}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">${item.usage}</div>
+            <a href="${item.url}" target="_blank" style="font-size:11px;color:var(--accent2);text-decoration:none;display:inline-block;margin-top:4px">🔗 Voir le produit →</a>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+function toggleSoinsCheck(key){soinsCheckState[key]=!soinsCheckState[key];saveSoinsState();renderSoinsCourses();}
+
+loadState();
+loadSoinsState();
+['j1','j2','j3'].forEach(dk=>renderExercises(dk));
+renderMealDays();
+</script>
+</body>
+</html>
